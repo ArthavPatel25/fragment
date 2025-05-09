@@ -11,6 +11,8 @@
     "url": "git+https://github.com/ArthavPatel25/fragment.git"
   },
   "author": "Arthav Patel",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "prettier": "3.5.3"
+  }
 }
-
