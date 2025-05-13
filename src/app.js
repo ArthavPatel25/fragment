@@ -18,6 +18,7 @@ app.use(compression());
 
 app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
+
   res.status(200).json({
     status: 'ok',
     author,
