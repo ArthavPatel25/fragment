@@ -4,12 +4,12 @@
   "version": "0.0.1",
   "description": "Fragments back-end API",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint \"./src/**/*.js\"",
-    "start": "node src/server.js",
-    "dev": "cross-env LOG_LEVEL=debug nodemon ./src/server.js --watch src",
-    "debug": "cross-env LOG_LEVEL=debug nodemon --inspect=0.0.0.0:9229 ./src/server.js --watch src"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "lint": "eslint \"./src/**/*.js\"",
+  "start": "node src/index.js",
+  "dev": "cross-env LOG_LEVEL=debug nodemon src/index.js --watch src",
+  "debug": "cross-env LOG_LEVEL=debug node --inspect src/index.js"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ArthavPatel25/fragment.git"
