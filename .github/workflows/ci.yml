@@ -1,20 +1,9 @@
-name: ci
-
-on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+# modifications to .github/workflows/ci.yml
 
 jobs:
   lint:
     name: ESLint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -34,9 +23,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -48,6 +34,13 @@ jobs:
           cache: 'npm'
 
       - name: Install node dependencies and run Tests
-        run: |
-          npm ci
-          npm test
+        # There are two ways we could do this:
+        #
+        # 1. Call `npm ci` followed by `npm test` like so (NOTE: the use of | and -):
+        # run: |
+        # - npm install
+        # - npm test
+        #
+        # 2. Use `install-ci-test` to do it in a single command, see https://docs.npmjs.com/cli/v8/commands/npm-install-ci-test
+        # run: npm install-ci-test
+        run: npm install-ci-test
