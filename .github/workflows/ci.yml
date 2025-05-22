@@ -1,5 +1,3 @@
-# .github/workflows/ci.yml
-
 name: ci
 
 on:
@@ -16,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: fragment  # 👈 Run all steps from the fragment folder
+        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -38,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: fragment  
+        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -49,5 +47,7 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Install node dependencies and run Tests
-        run: npm install-ci-test
+      - name: Install node dependencies and run tests
+        run: |
+          npm ci
+          npm test
