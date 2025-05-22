@@ -29,9 +29,7 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./fragment
+    
     steps:
       - name: Check out code
         uses: actions/checkout@v4
