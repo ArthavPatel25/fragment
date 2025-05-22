@@ -14,6 +14,9 @@ jobs:
   lint:
     name: ESLint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fragment  # 👈 Run all steps from the fragment folder
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -33,6 +36,9 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fragment  
     steps:
       - name: Check out code
         uses: actions/checkout@v4
