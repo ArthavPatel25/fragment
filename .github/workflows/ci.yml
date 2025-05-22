@@ -12,12 +12,12 @@ jobs:
   lint:
     name: ESLint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      - name: Change into fragment directory
+        run: cd fragment
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -26,20 +26,24 @@ jobs:
           cache: 'npm'
 
       - name: Install node dependencies
-        run: npm ci
+        run: |
+          cd fragment
+          npm ci
 
       - name: Run ESLint
-        run: npm run lint
+        run: |
+          cd fragment
+          npm run lint
 
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      - name: Change into fragment directory
+        run: cd fragment
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -48,7 +52,11 @@ jobs:
           cache: 'npm'
 
       - name: Install node dependencies
-        run: npm ci
+        run: |
+          cd fragment
+          npm ci
 
       - name: Run Unit Tests
-        run: npm test
+        run: |
+          cd fragment
+          npm test
