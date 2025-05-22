@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./fragment
+        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./fragment
+        working-directory: fragment
     steps:
       - name: Check out code
         uses: actions/checkout@v4
