@@ -4,28 +4,33 @@ const passport = require('passport');
 const auth = require('./auth');
 const cors = require('cors');
 const { createErrorResponse } = require('./response');
+const logger = require('./logger');
 
-//  Create an Express app first
 const app = express();
 
-// Enable CORS
 app.use(cors({
-  origin: 'http://localhost:1234', // change if deploying elsewhere
+  origin: 'http://localhost:1234',
 }));
 
-// Use gzip/deflate compression middleware
 app.use(compression());
 
-// Initialize passport and use our auth strategy
 passport.use(auth.strategy());
 app.use(passport.initialize());
 
-// Define routes
 app.use('/', require('./routes'));
 
-//  404 middleware for unknown routes (placed last)
 app.use((req, res) => {
   res.status(404).json(createErrorResponse(404, 'not found'));
 });
+
+/* eslint-disable no-unused-vars */
+app.use((err, req, res, next) => {
+  logger.error({ err }, 'Unhandled error');
+  res.status(500).json({
+    status: 'error',
+    message: err.message,
+  });
+});
+/* eslint-enable no-unused-vars */
 
 module.exports = app;
