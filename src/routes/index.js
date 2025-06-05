@@ -1,13 +1,11 @@
 const express = require('express');
 const { version, author } = require('../../package.json');
 const { createSuccessResponse } = require('../response');
+const { authenticate } = require('../auth');
 
 const router = express.Router();
 
-// Auth middleware for protected routes
-const { authenticate } = require('../auth');
-
-// Secure all /v1 routes
+// Secure all /v1 routes with authentication middleware
 router.use('/v1', authenticate(), require('./api'));
 
 // Public health check route
