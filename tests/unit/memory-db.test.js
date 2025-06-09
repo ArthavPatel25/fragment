@@ -1,5 +1,6 @@
 // Fix this path to point to your project's `memory-db.js` source file
 const MemoryDB = require('../../src/model/data/memory/memory-db');
+const {writeFragment, readFragment, writeFragmentData, readFragmentData} = require('../../src/model/data/memory/index');
 
 describe('memory-db', () => {
   let db;
@@ -86,5 +87,42 @@ describe('memory-db', () => {
     expect(async () => await db.del()).rejects.toThrow();
     expect(async () => await db.del(1)).rejects.toThrow();
     expect(async () => await db.del(1, 1)).rejects.toThrow();
+  });
+});
+
+describe('In-Memory Fragment DB operations', () => {
+  const fragment = {
+    id: 'frag1',
+    ownerId: 'user1',
+    type: 'text/plain',
+    size: 100,
+    created: new Date().toISOString(),
+    updated: new Date().toISOString(),
+  };
+
+  const fragmentBuffer = Buffer.from('This is fragment data');
+
+  test('writeFragment() stores metadata and readFragment() retrieves it', async () => {
+    await writeFragment(fragment);
+    const result = await readFragment(fragment.ownerId, fragment.id);
+
+    expect(result).toEqual(fragment);
+  });
+
+  test('readFragment() returns undefined for non-existing fragment', async () => {
+    const result = await readFragment('nonuser', 'nonfrag');
+    expect(result).toBeUndefined();
+  });
+
+  test('writeFragmentData() stores data and readFragmentData() retrieves it', async () => {
+    await writeFragmentData(fragment.ownerId, fragment.id, fragmentBuffer);
+    const result = await readFragmentData(fragment.ownerId, fragment.id);
+
+    expect(result).toEqual(fragmentBuffer);
+  });
+
+  test('readFragmentData() returns undefined for non-existing data', async () => {
+    const result = await readFragmentData('nonuser', 'nonfrag');
+    expect(result).toBeUndefined();
   });
 });

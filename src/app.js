@@ -1,51 +1,29 @@
-// Load environment variables from .env
-require('dotenv').config();
-
+// src/app.js
 const express = require('express');
-const morgan = require('morgan');
+const compression = require('compression');
 const passport = require('passport');
-const routes = require('./routes');
+const auth = require('./auth'); // add this
+const cors = require('cors');
+const { createErrorResponse } = require('./response');
 
-
+// Create an Express app
 const app = express();
 
+app.use(cors({
+  origin: 'http://localhost:1234', // replace with your frontend URL
+  // You can add options like credentials: true if needed
+}));
+// Use gzip/deflate compression middleware
+app.use(compression());
 
-
-// Logging HTTP requests
-app.use(morgan(process.env.LOG_LEVEL || 'dev'));
-
-
-app.use(express.json());
-app.use(express.text({ type: '*/*' }));
-
-
+// Initialize passport and use our strategy
+passport.use(auth.strategy());
 app.use(passport.initialize());
 
+// Define routes
 
-app.use('/', routes);
-
-// ========== 404 Not Found Handler ==========
+app.use('/', require('./routes'));
 app.use((req, res) => {
-  res.status(404).json({
-    status: 'error',
-    error: {
-      code: 404,
-      message: 'not found',
-    },
-  });
+  res.status(404).json(createErrorResponse(404, 'Not Found'));
 });
-
-
-app.use((err, req, res) => {
-  console.error('Unhandled error:', err.stack);
-  res.status(500).json({
-    status: 'error',
-    error: {
-      code: 500,
-      message: 'Internal server error',
-    },
-  });
-});
-
-// Export the app for use in server.js or tests
 module.exports = app;

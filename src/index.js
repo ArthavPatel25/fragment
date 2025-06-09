@@ -1,6 +1,7 @@
 // src/index.js
 
 require('dotenv').config();
+
 const logger = require('./logger');
 
 process.on('uncaughtException', (err, origin) => {
@@ -13,5 +14,5 @@ process.on('unhandledRejection', (reason, promise) => {
   throw reason;
 });
 
-require('./server');
 
+require('./server');
