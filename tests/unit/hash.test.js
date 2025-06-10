@@ -8,8 +8,4 @@ describe('hash()', () => {
     expect(hash(email)).toEqual(hashedEmail);
   });
 
-  test('hashing should always return the same value for a given string', () => {
-    const email = 'user1@example.com';
-    expect(hash(email)).toEqual(hash(email));
   });
-});

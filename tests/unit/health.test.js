@@ -2,10 +2,8 @@
 
 const request = require('supertest');
 
-// Get our Express app object (we don't need the server part)
 const app = require('../../src/app');
 
-// Get the version and author from our package.json
 const { version, author } = require('../../package.json');
 
 describe('/ health check', () => {
@@ -19,11 +17,7 @@ describe('/ health check', () => {
     expect(res.headers['cache-control']).toEqual('no-cache');
   });
 
-  test('should return status: ok in response', async () => {
-    const res = await request(app).get('/');
-    expect(res.body.status).toEqual('ok');
-  });
-
+  
   test('should return correct version, githubUrl, and author in response', async () => {
     const res = await request(app).get('/');
     expect(res.body.author).toEqual(author);

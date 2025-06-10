@@ -3,7 +3,7 @@ const { Fragment } = require('../../model/fragment');
 
 module.exports = async (req, res) => {
   try {
-    const fragments = await Fragment.byUser(req.user, false); // set true if you want full objects
+    const fragments = await Fragment.byUser(req.user, false); 
     res.status(200).json(createSuccessResponse({ fragments }));
   } catch (err) {
     res.status(500).json({ error: 'Internal Server Error', err });

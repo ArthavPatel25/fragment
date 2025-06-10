@@ -1,11 +1,10 @@
-// Fix this path to point to your project's `memory-db.js` source file
 const MemoryDB = require('../../src/model/data/memory/memory-db');
 const {writeFragment, readFragment, writeFragmentData, readFragmentData} = require('../../src/model/data/memory/index');
 
 describe('memory-db', () => {
   let db;
 
-  // Each test will get its own, empty database instance
+  
   beforeEach(() => {
     db = new MemoryDB();
   });

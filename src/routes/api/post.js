@@ -29,10 +29,10 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('📩 Incoming fragment post request');
-    console.log('👤 User:', req.user);
-    console.log('📝 Content-Type:', type);
-    console.log('📦 Buffer size:', req.body.length);
+    console.log('Incoming fragment post request');
+    console.log('User:', req.user);
+    console.log('Content-Type:', type);
+    console.log('Buffer size:', req.body.length);
 
     // Create and save fragment
     const fragment = new Fragment({
@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
     logger.info(`saving fragment with ID: ${fragment.id}`)
     await fragment.save();
 
-    console.log('✅ Fragment saved:', fragment);
+    console.log('Fragment saved:', fragment);
 
     // Build the Location URL
     const baseUrl = process.env.API_URL || `${req.protocol}://${req.headers.host}`;
@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error({ err }, '❌ Error saving fragment');
+    logger.error({ err }, 'Error saving fragment');
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

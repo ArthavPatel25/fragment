@@ -10,18 +10,15 @@ const { createErrorResponse } = require('./response');
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:1234', // replace with your frontend URL
-  // You can add options like credentials: true if needed
+  origin: 'http://localhost:1234', 
 }));
-// Use gzip/deflate compression middleware
+
 app.use(compression());
 
-// Initialize passport and use our strategy
 passport.use(auth.strategy());
 app.use(passport.initialize());
 
-// Define routes
-
+// routes
 app.use('/', require('./routes'));
 app.use((req, res) => {
   res.status(404).json(createErrorResponse(404, 'Not Found'));

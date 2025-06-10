@@ -2,11 +2,8 @@ const express = require('express');
 const router = express.Router();
 const contentType = require('content-type');
 const { Fragment } = require('../../model/fragment');
-// const auth = require('../../auth');
 const logger = require('../../logger');
 
-
-// Raw body parser for supported types (Buffer-based)
 const rawBody = () =>
   express.raw({
     
@@ -29,9 +26,8 @@ const rawBody = () =>
 
 logger.info('API router initialized with raw body parser and fragment routes');
 
-// Future endpoints like /v1/fragments will go here
-router.get('/fragments', require('./get')); // You can change this once get.js is ready
-// POST /fragments (create new fragment with raw body)
+router.get('/fragments', require('./get')); 
+
 logger.info('Registering POST /v1/fragments route');
 
 router.post('/fragments', rawBody(), require('./post'));
