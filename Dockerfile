@@ -1,53 +1,56 @@
-# This Dockerfile defines the environment and steps required to run the
-# fragments microservice in a Docker container.
+# Stage 1: Builder
+# This stage is responsible for installing all dependencies (including devDependencies)
+# and any build-time artifacts. We use a full Node.js image here.
+FROM node:20.17.0 AS builder
 
-# 1. Specify the base image
-# We start from an official Node.js image. It's best to be specific
-# with the version to ensure a consistent environment.
-# Run `node --version` on your local machine to find your version
-# and use a matching one here (e.g., node:20.11.0, node:18.17.1, etc.).
-FROM node:20.17.0
+LABEL maintainer="Arthav Patel <acpatel23@myseneca.ca>"
+LABEL description="Fragments node.js microservice - Build Stage"
 
-# 2. Add metadata to the image
-LABEL maintainer="Arthav Patel <acpatel23@myseneca.ca> "
-LABEL description="Fragments node.js microservice"
-
-# 3. Set environment variables for the container
-# Default port for the service to run on
-ENV PORT=8080
-# Reduce the amount of noise from npm during installation
-ENV NPM_CONFIG_LOGLEVEL=warn
-# Disable colored output in logs, which can be messy in Docker logs
-ENV NPM_CONFIG_COLOR=false
-
-# 4. Set the working directory inside the image
-# This creates the /app directory and sets all subsequent commands
-# (like COPY, RUN, CMD) to be executed from within this directory.
 WORKDIR /app
 
-# 5. Copy package.json and package-lock.json
-# We copy these first and run `npm install` separately. Because of Docker's
-# layer caching, this step will only be re-run if these files change,
-# speeding up subsequent builds.
+# Copy package.json and package-lock.json first to leverage Docker cache
+# If these files don't change, this layer and subsequent 'npm install' can be cached.
 COPY package*.json ./
 
-# 6. Install application dependencies
-# This command runs `npm install` inside the container using the
-# package files we just copied.
-RUN npm install
+# Install all dependencies (production and development).
+# Using npm ci ensures exact versions from package-lock.json and a clean install.
+# If you don't have a package-lock.json or prefer npm install, that's fine too.
+RUN npm ci --omit=dev --no-fund --no-audit
 
-# 7. Copy the application source code
-# Copy the contents of the local `src` directory into a `src`
-# directory inside the container (at /app/src).
+# If you had any build steps (e.g., TypeScript compilation, frontend build), they would go here.
+# For a typical Node.js backend, this might not be strictly necessary if all is JS.
+# COPY . .
+# RUN npm run build # Example: if you had a 'build' script
+
+# Stage 2: Production
+# This stage uses a much smaller base image, containing only what's needed for runtime.
+# We copy only the production dependencies and source code from the 'builder' stage.
+FROM node:20.17.0-slim
+
+LABEL maintainer="Arthav Patel <acpatel23@myseneca.ca>"
+LABEL description="Fragments node.js microservice - Production Stage"
+
+# Set environment variables for the container
+ENV PORT=8080
+ENV NODE_ENV=production
+ENV NPM_CONFIG_LOGLEVEL=warn
+ENV NPM_CONFIG_COLOR=false
+
+WORKDIR /app
+
+# Copy *only* the production-ready node_modules from the builder stage
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy your application source code.
+# Note: Ensure you are copying only what's needed for runtime.
 COPY ./src ./src
 
-# Copy our HTPASSWD file for Basic Auth
+# Copy the .htpasswd file. Consider if this needs to be in production or if it's only for tests.
+# If it's only for tests, it shouldn't be in your final production image.
 COPY ./tests/.htpasswd ./tests/.htpasswd
 
-# 8. Document the port the container listens on
-# This is for documentation purposes; it doesn't actually open the port.
+# Document the port the container listens on
 EXPOSE 8080
 
-# 9. Specify the command to run when the container starts
-# This will execute `npm start` to launch the node.js server.
-CMD ["npm", "start"]
+# Specify the command to run when the container starts
+CMD ["node", "src/server.js"]
