@@ -1,4 +1,7 @@
-const validateKey = (key) => typeof key === 'string';
+// src/model/data/memory/memory-db.js
+
+// Change: Trim whitespace before validating
+const validateKey = (key) => typeof key === 'string' && key.trim().length > 0;
 
 class MemoryDB {
   constructor() {
@@ -28,6 +31,7 @@ class MemoryDB {
    * Puts a value into the given primaryKey and secondaryKey
    * @param {string} primaryKey
    * @param {string} secondaryKey
+   * @param {any} value
    * @returns {Promise<void>}
    */
   put(primaryKey, secondaryKey, value) {
@@ -38,9 +42,7 @@ class MemoryDB {
     }
 
     const db = this.db;
-    // Make sure the `primaryKey` exists, or create
     db[primaryKey] = db[primaryKey] || {};
-    // Add the `value` to the `secondaryKey`
     db[primaryKey][secondaryKey] = value;
     return Promise.resolve();
   }
@@ -56,7 +58,6 @@ class MemoryDB {
       throw new Error(`primaryKey string is required, got primaryKey=${primaryKey}`);
     }
 
-    // No matter what, we always return an array (even if empty)
     const db = this.db;
     const values = db[primaryKey] ? Object.values(db[primaryKey]) : [];
     return Promise.resolve(values);
@@ -75,7 +76,6 @@ class MemoryDB {
       );
     }
 
-    // Throw if trying to delete a key that doesn't exist
     if (!(await this.get(primaryKey, secondaryKey))) {
       throw new Error(
         `missing entry for primaryKey=${primaryKey} and secondaryKey=${secondaryKey}`
