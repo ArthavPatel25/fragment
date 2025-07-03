@@ -1,7 +1,7 @@
 # Stage 1: Builder
 # This stage is responsible for installing all dependencies (including devDependencies)
 # and any build-time artifacts. We use a full Node.js image here.
-FROM node:20.17.0 AS builder
+FROM node:20.17.1 AS builder
 
 LABEL maintainer="Arthav Patel <acpatel23@myseneca.ca>"
 LABEL description="Fragments node.js microservice - Build Stage"
@@ -25,7 +25,7 @@ RUN npm ci --omit=dev --no-fund --no-audit
 # Stage 2: Production
 # This stage uses a much smaller base image, containing only what's needed for runtime.
 # We copy only the production dependencies and source code from the 'builder' stage.
-FROM node:20.17.0-slim
+FROM node:20.17.1-slim
 
 LABEL maintainer="Arthav Patel <acpatel23@myseneca.ca>"
 LABEL description="Fragments node.js microservice - Production Stage"
