@@ -30,7 +30,8 @@ const rawBody = () =>
 logger.info('API router initialized with raw body parser and fragment routes');
 
 // Future endpoints like /v1/fragments will go here
-router.get('/fragments', require('./get')); 
+router.get('/fragments', require('./get'));
+router.get('/fragments/:id.:ext', require('./get-id-ext')); 
 router.get('/fragments/:id', require('./get-id'));
 router.get('/fragments/:id/info', require('./get-info'));
 // POST /fragments (create new fragment with raw body)

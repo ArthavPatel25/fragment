@@ -123,8 +123,11 @@ class Fragment {
    * @returns {boolean} true if fragment's type is text/*
    */
   get isText() {
-    return this.mimeType.startsWith('text/');
-  }
+  return (
+    this.mimeType.startsWith('text/') ||
+    this.mimeType === 'application/json'
+  );
+}
 
   /**
    * Returns the formats into which this fragment type can be converted
