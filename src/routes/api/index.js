@@ -39,5 +39,6 @@ logger.info('Registering POST /v1/fragments route');
 
 router.post('/fragments', rawBody(), require('./post'));
 
+router.delete('/fragments/:id', require('./delete-id'));
 module.exports = router;
 
