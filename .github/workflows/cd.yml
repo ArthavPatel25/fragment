@@ -81,6 +81,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.update-task-def.outputs.task-definition }}
-          service: fragments-service
+          service: fragments-service-1
           cluster: fragment-cluster
           wait-for-service-stability: true
