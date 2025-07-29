@@ -66,7 +66,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: fragments-definition.json 
-          container-name: fragments 
+          container-name: fragments-container 
           image: ${{ steps.login-ecr.outputs.registry }}/fragments:${{ github.ref_name }} 
           environment-variables: |
             LOG_LEVEL=info
