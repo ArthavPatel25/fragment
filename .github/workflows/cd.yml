@@ -1,10 +1,14 @@
 # Continuous Delivery Workflow
-## This should happen whenever we push a new tag, and we tag an existing
+#
+# This should happen whenever we push a new tag, and we tag an existing
 # commit after we know it's good (e.g., has been tested).
-## To create a new tag, we also need to update the package.json version:
-## $ npm version 0.5.0
-## This will update `version` in package.json to `0.5.0` and create a new
-# tag, `v0.5.0` in git. We'll then use this tag (i.e., `v0.5.0`) to tag
+#
+# To create a new tag, we also need to update the package.json version:
+#
+# $ npm version 0.5.0
+#
+# This will update version in package.json to 0.5.0 and create a new
+# tag, v0.5.0 in git. We'll then use this tag (i.e., v0.5.0) to tag
 # our docker image before we push to AWS.
 name: cd
 
@@ -24,14 +28,10 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
-      # Use buildx, which is faster and can optimize the build steps
+        # Use buildx, which is faster and can optimize the build steps
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # NOTE: ending and restarting the Learner Lab will void these secrets,
-      # update them if you are doing this during a new session:
-      # `Error: The security token included in the request is expired`
       - name: Configure AWS Credentials using Secrets
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -40,29 +40,49 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           # Hard-code our region, which isn't a secret, and won't change
-          aws-region: us-east-1 # Make sure this matches your ECR repo region
+          aws-region: us-east-1
 
       # Login to our ECR repository using the configured credentials
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Build and Push an Image to Amazon ECR
       - name: Build and push to Amazon ECR
         env:
-          # Define an Environment Variable with our ECR Registry, getting
-          # the value from the previous step's outputs
+          # Get ECR registry URL from previous step
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          # Define an Environment Variable with our ECR Repository Name
+          # Name of your ECR repository
           ECR_REPO: fragments
-          # We'll give this image two different tags. First, we'll use the git tag (vX.Y.Z)
-          # so that we can always go back and re-create this setup again in the future
-          # if we have to test or debug something. Second, we'll also replace the
-          # `latest` tag, since this is our most up-to-date version.
+          # Use the tag version (e.g., v0.1.0) and also tag it as latest
           VERSION_TAG: ${{ github.ref_name }}
         uses: docker/build-push-action@v6
         with:
+          context: . # Add context to ensure Dockerfile is found
           push: true
-          context: . # This tells Docker to look for the Dockerfile in the current directory
-          # Use the git tag version and `latest`
-          tags: 992382768156.dkr.ecr.us-east-1.amazonaws.com/fragments:${{ env.VERSION_TAG }}, 992382768156.dkr.ecr.us-east-1.amazonaws.com/fragments:latest
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ env.VERSION_TAG }}, ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:latest
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: update-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: fragments-definition.json # Your task definition file
+          container-name: fragments # Name of the container within your task definition
+          image: ${{ steps.login-ecr.outputs.registry }}/fragments:${{ github.ref_name }} # Use the image we just built and pushed to ECR
+          # No need for AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN here,
+          # as the ECS Task Role (taskRoleArn) handles permissions at runtime.
+          environment-variables: |
+            LOG_LEVEL=info
+            NODE_ENV=production
+            AWS_REGION=us-east-1
+            AWS_S3_BUCKET_NAME=arthav-fragments # IMPORTANT: Replace with your actual S3 bucket name
+            # Add any other required environment variables for your application here (e.g., Cognito IDs)
+            AWS_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USER_POOL_ID }}
+            AWS_COGNITO_CLIENT_ID=${{ secrets.AWS_COGNITO_CLIENT_ID }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.update-task-def.outputs.task-definition }}
+          service: fragments-service
+          cluster: fragments-cluster
+          wait-for-service-stability: true
