@@ -1,14 +1,14 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:us-east-1:992382768156:task-definition/fragments-task:10",
+  "taskDefinitionArn": "arn:aws:ecs:us-east-1:992382768156:task-definition/fragments-task-1:1",
   "containerDefinitions": [
     {
-      "name": "fragments-container",
-      "image": "992382768156.dkr.ecr.us-east-1.amazonaws.com/fragments:v0.9.8",
+      "name": "fragments-container-1",
+      "image": "arthavpatel2511/fragments:latest",
       "cpu": 256,
       "memoryReservation": 512,
       "portMappings": [
         {
-          "name": "fragments-container-80-tcp",
+          "name": "fragments-container-1-80-tcp",
           "containerPort": 80,
           "hostPort": 80,
           "protocol": "tcp",
@@ -19,56 +19,47 @@
       "environment": [
         {
           "name": "AWS_COGNITO_POOL_ID",
-          "value": "us-east-1_4HjCH9kEV"
-        },
-        {
-          "name": "AWS_REGION",
-          "value": "us-east-1"
-        },
-        {
-          "name": "PORT",
-          "value": "80"
+          "value": "us-east-1_KLZAwhdWg"
         },
         {
           "name": "AWS_S3_BUCKET_NAME",
           "value": "arthav-fragments"
         },
         {
-          "name": "NODE_ENV",
-          "value": "production"
+          "name": "PORT",
+          "value": "80"
         },
         {
           "name": "AWS_COGNITO_CLIENT_ID",
-          "value": ""
+          "value": "4t4gpqpcv1k6knsgm3fjmj2tpn"
         },
         {
           "name": "LOG_LEVEL",
-          "value": "info"
-        },
-        {
-          "name": "AWS_COGNITO_USER_POOL_ID",
-          "value": ""
+          "value": "debug"
         }
       ],
+      "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
+      "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/fragments-task",
+          "awslogs-group": "/ecs/fragments-task-1",
           "awslogs-create-group": "true",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
-        }
+        },
+        "secretOptions": []
       },
       "systemControls": []
     }
   ],
-  "family": "fragments-task",
+  "family": "fragments-task-1",
   "taskRoleArn": "arn:aws:iam::992382768156:role/LabRole",
   "executionRoleArn": "arn:aws:iam::992382768156:role/LabRole",
   "networkMode": "awsvpc",
-  "revision": 10,
+  "revision": 1,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -79,9 +70,6 @@
       "name": "ecs.capability.execution-role-awslogs"
     },
     {
-      "name": "com.amazonaws.ecs.capability.ecr-auth"
-    },
-    {
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
     },
     {
@@ -89,9 +77,6 @@
     },
     {
       "name": "com.amazonaws.ecs.capability.task-iam-role"
-    },
-    {
-      "name": "ecs.capability.execution-role-ecr-pull"
     },
     {
       "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
@@ -117,7 +102,8 @@
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
   },
-  "registeredAt": "2025-07-29T04:48:03.548Z",
+  "registeredAt": "2025-07-29T06:24:50.332Z",
   "registeredBy": "arn:aws:sts::992382768156:assumed-role/voclabs/user4086701=acpatel23@myseneca.ca",
+  
   "tags": []
 }
