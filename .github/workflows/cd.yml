@@ -57,7 +57,7 @@ jobs:
           VERSION_TAG: ${{ github.ref_name }}
         uses: docker/build-push-action@v6
         with:
-          context: . # Add context to ensure Dockerfile is found
+          context: . 
           push: true
           tags: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:${{ env.VERSION_TAG }}, ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPO }}:latest
 
@@ -65,17 +65,15 @@ jobs:
         id: update-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: fragments-definition.json # Your task definition file
-          container-name: fragments # Name of the container within your task definition
-          image: ${{ steps.login-ecr.outputs.registry }}/fragments:${{ github.ref_name }} # Use the image we just built and pushed to ECR
-          # No need for AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN here,
-          # as the ECS Task Role (taskRoleArn) handles permissions at runtime.
+          task-definition: fragments-definition.json 
+          container-name: fragments 
+          image: ${{ steps.login-ecr.outputs.registry }}/fragments:${{ github.ref_name }} 
           environment-variables: |
             LOG_LEVEL=info
             NODE_ENV=production
             AWS_REGION=us-east-1
-            AWS_S3_BUCKET_NAME=arthav-fragments # IMPORTANT: Replace with your actual S3 bucket name
-            # Add any other required environment variables for your application here (e.g., Cognito IDs)
+            AWS_S3_BUCKET_NAME=arthav-fragments 
+          
             AWS_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USER_POOL_ID }}
             AWS_COGNITO_CLIENT_ID=${{ secrets.AWS_COGNITO_CLIENT_ID }}
 

@@ -104,6 +104,6 @@
   },
   "registeredAt": "2025-07-29T00:32:33.847Z",
   "registeredBy": "arn:aws:sts::992382768156:assumed-role/voclabs/user4086701=acpatel23@myseneca.ca",
-  "enableFaultInjection": false,
+  
   "tags": []
 }
