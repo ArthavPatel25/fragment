@@ -1,7 +1,6 @@
 const express = require('express');
 const { version, author } = require('../../package.json');
 const { authenticate } = require('../auth');
-const { hostname } = require('os'); // ✅ add this line
 
 const router = express.Router();
 
@@ -16,8 +15,8 @@ router.get('/', (req, res) => {
     author,
     githubUrl: 'https://github.com/ArthavPatel2511/fragments',
     version,
-    hostname: hostname(), // ✅ add this line
   });
 });
+
 
 module.exports = router;

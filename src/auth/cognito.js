@@ -17,7 +17,7 @@ const jwtVerifier = CognitoJwtVerifier.create({
   userPoolId: process.env.AWS_COGNITO_POOL_ID,
   clientId: process.env.AWS_COGNITO_CLIENT_ID,
   
-  tokenUse: 'id',
+  tokenUse: 'access',
 });
 
 jwtVerifier
