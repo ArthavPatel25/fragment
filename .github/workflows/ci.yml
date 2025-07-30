@@ -65,7 +65,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Setup node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
@@ -78,16 +78,20 @@ jobs:
         run: docker compose up -d
 
       - name: Wait for LocalStack to be ready
+        shell: bash
         run: |
           echo "waiting for LocalStack..."
-          for i in {1..60}; do
-            if curl -s http://localhost:4566/_localstack/health | grep "\"s3\": \"running\""; then
+          for i in {1..90}; do
+            if curl -s http://localhost:4566/_localstack/health | grep '"s3": "running"'; then
               echo "LocalStack is ready"
               exit 0
             fi
             sleep 2
           done
           echo "LocalStack failed to start in time"
+          curl -s http://localhost:4566/_localstack/health || true
+          docker ps || true
+          docker logs $(docker ps -qf "name=localstack") || true
           exit 1
 
       - name: Setup Local AWS Resources
