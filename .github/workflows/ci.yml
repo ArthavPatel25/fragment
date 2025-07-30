@@ -98,8 +98,6 @@ jobs:
           # Use 3 tags :sha-sha-7d821bd14e0d6c381dc57a5369ae1a3a9220664f, :main, and :latest
           tags: ${{ env.DOCKERHUB_REPO }}:${{ env.SHA_TAG }}, ${{ env.DOCKERHUB_REPO }}:main, ${{ env.DOCKERHUB_REPO }}:latest
 
-
-
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
@@ -122,7 +120,6 @@ jobs:
         run: ./scripts/local-aws-setup.sh
       - name: Run Hurl Tests
         run: npm run test:integration
-
 
   docker-hub:
     name: Build and Push to Docker Hub      
