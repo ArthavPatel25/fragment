@@ -82,7 +82,7 @@ jobs:
         run: |
           echo "waiting for LocalStack..."
           for i in {1..90}; do
-            if curl -s http://localhost:4566/_localstack/health | grep '"s3": "available"'; then
+            if curl -s http://localhost:4566/_localstack/health | grep -E '"s3": "(running|available)"'; then
               echo "LocalStack is ready"
               exit 0
             fi
@@ -93,7 +93,6 @@ jobs:
           docker ps || true
           docker logs $(docker ps -qf "name=localstack") || true
           exit 1
-
 
       - name: Setup Local AWS Resources
         run: ./scripts/local-aws-setup.sh
