@@ -22,9 +22,18 @@ until (curl --silent http://localhost:4566/_localstack/health | grep "\"s3\": \"
 done
 echo 'LocalStack S3 Ready'
 
-# Create the S3 bucket
+# Create the S3 bucket (ignore if exists)
 echo "Creating LocalStack S3 bucket: fragments"
-aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket fragments
+aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket fragments 2>/dev/null || echo "S3 bucket already exists"
+
+# Delete existing DynamoDB table if it exists
+echo "Checking if DynamoDB table exists..."
+if aws --endpoint-url=http://localhost:8000 dynamodb describe-table --table-name fragments > /dev/null 2>&1; then
+    echo "Table exists, deleting it..."
+    aws --endpoint-url=http://localhost:8000 dynamodb delete-table --table-name fragments
+    aws --endpoint-url=http://localhost:8000 dynamodb wait table-not-exists --table-name fragments
+    echo "Table deleted"
+fi
 
 # Create the DynamoDB table
 echo "Creating DynamoDB table: fragments"
@@ -42,3 +51,5 @@ dynamodb create-table \
 
 # Wait until the table exists
 aws --endpoint-url=http://localhost:8000 dynamodb wait table-exists --table-name fragments
+
+echo "AWS resources setup complete!"

@@ -22,16 +22,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          HURL_SKIP_INSTALL: 1
 
       - name: Run ESLint
         run: npm run lint
 
-  # Lint our Dockerfile using Hadolint
   dockerfile-lint:
     name: Dockerfile Lint
     runs-on: ubuntu-latest
     steps:
-      # https://github.com/marketplace/actions/hadolint-action
       - uses: actions/checkout@v4
       - uses: hadolint/hadolint-action@v3.1.0
         with:
@@ -40,7 +40,6 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -53,50 +52,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          HURL_SKIP_INSTALL: 1
 
       - name: Run Unit Tests
         run: npm test
-
-  docker-hub:
-    name: Build and Push to Docker Hub
-    # Don't bother running this job unless the other three all pass
-    needs: [lint, dockerfile-lint, unit-tests, integration-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4 # Needed for the Dockerfile and source code
-
-      # Set up buildx for optimal Docker Builds, see:
-      # https://github.com/docker/setup-buildx-action
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # Login to Docker Hub using GitHub secrets, see:
-      # https://github.com/docker/login-action
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Build and Push an Image to Docker Hub
-      - name: Build and push
-        env:
-          # Define an Environment Variable with our Docker Hub Repo
-          # Replace `username` with your Docker Hub username and `fragments`
-          # with whatever you've named your Docker Hub repo
-          DOCKERHUB_REPO: arthavpatel2511/fragments 
-          # Define an Environment Variable with the current git commit's
-          # sha: sha-87f664e01bb5f242faa411e9e7fb9e75a58ae767
-          # Use the `github` context to get this, see:
-          # https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
-          SHA_TAG: sha-${{ github.sha }}
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          context: . # This tells Docker to look for the Dockerfile in the current directory
-          # Use 3 tags :sha-sha-7d821bd14e0d6c381dc57a5369ae1a3a9220664f, :main, and :latest
-          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.SHA_TAG }}, ${{ env.DOCKERHUB_REPO }}:main, ${{ env.DOCKERHUB_REPO }}:latest
 
   integration-tests:
     name: Integration Tests
@@ -104,19 +64,100 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-      - name: Setup node
+
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           cache: 'npm'
+
       - name: Install node dependencies
-        # NOTE: we need to install dev dependencies too vs. production only for hurl
         run: npm install
+
       - name: Build Containers
-        run: docker compose up -d
+        run: docker compose up -d --force-recreate
+
+      - name: Wait for all services to be healthy
+        run: |
+          echo "Waiting for all services to be ready..."
+          sleep 10
+          docker ps
+          echo "Checking service health..."
+          curl -f http://localhost:8080/ || echo "Fragment service not ready"
+          curl -f http://localhost:4566/_localstack/health || echo "LocalStack not ready"
+          curl -f http://localhost:8000/ || echo "DynamoDB not ready"
+
+      - name: Wait for LocalStack to be ready
+        shell: bash
+        run: |
+          echo "waiting for LocalStack..."
+          for i in {1..90}; do
+            if curl -s http://localhost:4566/_localstack/health | grep -E '"s3": "(running|available)"'; then
+              echo "LocalStack is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "LocalStack failed to start in time"
+          curl -s http://localhost:4566/_localstack/health || true
+          docker ps || true
+          docker logs $(docker ps -qf "name=localstack") || true
+          exit 1
+
       - name: Setup Local AWS Resources
-        # NOTE: this file needs to be made executable *before* you check into git:
-        # $ chmod +x ./scripts/local-aws-setup.sh
-        run: ./scripts/local-aws-setup.sh
+        run: |
+          chmod +x ./scripts/local-aws-setup.sh
+          ./scripts/local-aws-setup.sh
+
+      - name: Debug - Check container logs
+        run: |
+          echo "=== Fragment Application Logs ==="
+          docker logs fragment-fragments-1 || true
+          echo "=== LocalStack Logs ==="
+          docker logs fragment-localstack-1 || true
+          echo "=== DynamoDB Logs ==="
+          docker logs fragment-dynamodb-local-1 || true
+
+      - name: Debug - Test connectivity
+        run: |
+          echo "=== Testing LocalStack connectivity ==="
+          curl -s http://localhost:4566/_localstack/health || true
+          echo "=== Testing DynamoDB connectivity ==="
+          curl -s http://localhost:8000/ || true
+          echo "=== Testing Fragment app connectivity ==="
+          curl -s http://localhost:8080/v1/fragments || true
+
+      - name: Debug - Check environment variables in container
+        run: |
+          echo "=== Environment variables in fragment container ==="
+          docker exec fragment-fragments-1 env | grep -E "(AWS|LOG|NODE)" || true
+
       - name: Run Hurl Tests
         run: npm run test:integration
+
+  docker-hub:
+    name: Build and Push to Docker Hub
+    needs: [lint, dockerfile-lint, unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        env:
+          DOCKERHUB_REPO: arthavpatel2511/fragments
+          SHA_TAG: sha-${{ github.sha }}
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.SHA_TAG }}, ${{ env.DOCKERHUB_REPO }}:main, ${{ env.DOCKERHUB_REPO }}:latest
