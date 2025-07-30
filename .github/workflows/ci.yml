@@ -65,29 +65,35 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install node dependencies
         run: npm install
 
-      - name: Start Docker containers
+      - name: Build Containers
         run: docker compose up -d
 
       - name: Wait for LocalStack to be ready
         run: |
-          echo "Waiting for LocalStack..."
-          until curl -s http://localhost:4566/_localstack/health | grep "\"s3\": \"running\""; do
+          echo "waiting for LocalStack..."
+          for i in {1..60}; do
+            if curl -s http://localhost:4566/_localstack/health | grep "\"s3\": \"running\""; then
+              echo "LocalStack is ready"
+              exit 0
+            fi
             sleep 2
           done
+          echo "LocalStack failed to start in time"
+          exit 1
 
       - name: Setup Local AWS Resources
         run: ./scripts/local-aws-setup.sh
 
-      - name: Run Hurl Integration Tests
+      - name: Run Hurl Tests
         run: npm run test:integration
 
   docker-hub:
