@@ -40,7 +40,16 @@
         {
           "name": "AWS_DYNAMODB_TABLE_NAME",
           "value": "fragments"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "us-east-1"
+        },
+        {
+          "name": "AWS_DYNAMODB_ENDPOINT_URL",
+          "value": "https://dynamodb.us-east-1.amazonaws.com"
         }
+
       ],
       "environmentFiles": [],
       "mountPoints": [],
