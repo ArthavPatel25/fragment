@@ -5,7 +5,7 @@ const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require('@aw
 const logger = require('../../../logger');
 
 // Save metadata to DynamoDB
-function writeFragment(fragment) {
+async function writeFragment(fragment) {
   const params = {
     TableName: process.env.AWS_DYNAMODB_TABLE_NAME,
     Item: fragment,
@@ -14,7 +14,9 @@ function writeFragment(fragment) {
   const command = new PutCommand(params);
 
   try {
-    return ddbDocClient.send(command);
+    const result = await ddbDocClient.send(command);
+    logger.debug({ result, fragment }, 'Successfully wrote fragment to DynamoDB');
+    return result;
   } catch (err) {
     logger.warn({ err, params, fragment }, 'Error writing fragment to DynamoDB');
     throw err;
