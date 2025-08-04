@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:us-east-1:992382768156:task-definition/fragments-task-1:1",
+  "taskDefinitionArn": "arn:aws:ecs:us-east-1:992382768156:task-definition/fragments-task-1:6",
   "containerDefinitions": [
     {
       "name": "fragments-container-1",
@@ -22,12 +22,24 @@
           "value": "us-east-1_KLZAwhdWg"
         },
         {
-          "name": "AWS_S3_BUCKET_NAME",
-          "value": "arthav-fragments"
+          "name": "AWS_DYNAMODB_ENDPOINT_URL",
+          "value": "https://dynamodb.us-east-1.amazonaws.com"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "us-east-1"
         },
         {
           "name": "PORT",
           "value": "80"
+        },
+        {
+          "name": "AWS_DYNAMODB_TABLE_NAME",
+          "value": "fragments"
+        },
+        {
+          "name": "AWS_S3_BUCKET_NAME",
+          "value": "arthav-fragments"
         },
         {
           "name": "AWS_COGNITO_CLIENT_ID",
@@ -36,25 +48,10 @@
         {
           "name": "LOG_LEVEL",
           "value": "debug"
-        },
-        {
-          "name": "AWS_DYNAMODB_TABLE_NAME",
-          "value": "fragments"
-        },
-        {
-          "name": "AWS_REGION",
-          "value": "us-east-1"
-        },
-        {
-          "name": "AWS_DYNAMODB_ENDPOINT_URL",
-          "value": "https://dynamodb.us-east-1.amazonaws.com"
         }
-
       ],
-      "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
-      "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -72,7 +69,7 @@
   "taskRoleArn": "arn:aws:iam::992382768156:role/LabRole",
   "executionRoleArn": "arn:aws:iam::992382768156:role/LabRole",
   "networkMode": "awsvpc",
-  "revision": 1,
+  "revision": 6,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -115,7 +112,7 @@
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
   },
-  "registeredAt": "2025-07-29T06:24:50.332Z",
+  "registeredAt": "2025-08-04T02:07:28.438Z",
   "registeredBy": "arn:aws:sts::992382768156:assumed-role/voclabs/user4086701=acpatel23@myseneca.ca",
   "tags": []
 }
