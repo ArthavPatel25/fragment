@@ -1,10 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-# Setup steps for working with LocalStack and DynamoDB local instead of AWS.
-# Assumes aws cli is installed and LocalStack and DynamoDB local are running.
+# Wait for services and set up AWS resources for local development
 
 echo "Setting AWS environment variables for LocalStack"
-
 export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 export AWS_SESSION_TOKEN=test
@@ -15,41 +13,50 @@ echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"
 echo "AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN"
 echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION"
 
-# Wait for LocalStack to be ready
-echo 'Waiting for LocalStack S3...'
-until (curl --silent http://localhost:4566/_localstack/health | grep "\"s3\": \"\(running\|available\)\"" > /dev/null); do
-    sleep 5
+# Wait for LocalStack S3 to be ready
+echo "Waiting for LocalStack S3..."
+until aws s3 ls --endpoint-url=http://localhost:4566 --region us-east-1 2>/dev/null; do
+  sleep 1
 done
-echo 'LocalStack S3 Ready'
+echo "LocalStack S3 Ready"
 
-# Create the S3 bucket (ignore if exists)
+# Create S3 buckets
 echo "Creating LocalStack S3 bucket: fragments"
-aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket fragments 2>/dev/null || echo "S3 bucket already exists"
+aws s3 mb s3://fragments --endpoint-url=http://localhost:4566 --region us-east-1 2>/dev/null || echo "Bucket 'fragments' already exists or failed to create"
 
-# Delete existing DynamoDB table if it exists
+echo "Creating LocalStack S3 bucket: arthav-fragments"
+aws s3 mb s3://arthav-fragments --endpoint-url=http://localhost:4566 --region us-east-1 2>/dev/null || echo "Bucket 'arthav-fragments' already exists or failed to create"
+
+# Verify buckets were created
+echo "Verifying S3 buckets:"
+aws s3 ls --endpoint-url=http://localhost:4566 --region us-east-1
+
+# Check if DynamoDB table exists
 echo "Checking if DynamoDB table exists..."
-if aws --endpoint-url=http://localhost:8000 dynamodb describe-table --table-name fragments > /dev/null 2>&1; then
-    echo "Table exists, deleting it..."
-    aws --endpoint-url=http://localhost:8000 dynamodb delete-table --table-name fragments
-    aws --endpoint-url=http://localhost:8000 dynamodb wait table-not-exists --table-name fragments
-    echo "Table deleted"
-fi
+aws dynamodb describe-table --table-name fragments --endpoint-url=http://localhost:8000 --region us-east-1 2>/dev/null
 
-# Create the DynamoDB table
-echo "Creating DynamoDB table: fragments"
-aws --endpoint-url=http://localhost:8000 \
-dynamodb create-table \
+# If table doesn't exist, create it
+if [ $? -ne 0 ]; then
+  echo "Creating DynamoDB table: fragments"
+  aws dynamodb create-table \
     --table-name fragments \
     --attribute-definitions \
-        AttributeName=ownerId,AttributeType=S \
-        AttributeName=id,AttributeType=S \
+      AttributeName=ownerId,AttributeType=S \
+      AttributeName=id,AttributeType=S \
     --key-schema \
-        AttributeName=ownerId,KeyType=HASH \
-        AttributeName=id,KeyType=RANGE \
-    --provisioned-throughput \
-        ReadCapacityUnits=10,WriteCapacityUnits=5
-
-# Wait until the table exists
-aws --endpoint-url=http://localhost:8000 dynamodb wait table-exists --table-name fragments
+      AttributeName=ownerId,KeyType=HASH \
+      AttributeName=id,KeyType=RANGE \
+    --provisioned-throughput ReadCapacityUnits=10,WriteCapacityUnits=5 \
+    --endpoint-url=http://localhost:8000 \
+    --region us-east-1
+else
+  echo "DynamoDB table 'fragments' already exists"
+fi
 
 echo "AWS resources setup complete!"
+echo ""
+echo "Available S3 buckets:"
+aws s3 ls --endpoint-url=http://localhost:4566 --region us-east-1
+echo ""
+echo "DynamoDB tables:"
+aws dynamodb list-tables --endpoint-url=http://localhost:8000 --region us-east-1

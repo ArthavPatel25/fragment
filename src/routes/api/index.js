@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const contentType = require('content-type');
 const { Fragment } = require('../../model/fragment');
+// const putFragmentById = require('./put-id');
+
 // const auth = require('../../auth');
 const logger = require('../../logger');
 
@@ -30,15 +32,15 @@ const rawBody = () =>
 logger.info('API router initialized with raw body parser and fragment routes');
 
 // Future endpoints like /v1/fragments will go here
+// Group by HTTP method
 router.get('/fragments', require('./get'));
-router.get('/fragments/:id.:ext', require('./get-id-ext')); 
-router.get('/fragments/:id', require('./get-id'));
-router.get('/fragments/:id/info', require('./get-info'));
-// POST /fragments (create new fragment with raw body)
-logger.info('Registering POST /v1/fragments route');
-
 router.post('/fragments', rawBody(), require('./post'));
 
+router.get('/fragments/:id.:ext', require('./get-id-ext')); 
+router.get('/fragments/:id/info', require('./get-info'));
+router.get('/fragments/:id', require('./get-id'));
+router.put('/fragments/:id', rawBody(), require('./put-id'));
 router.delete('/fragments/:id', require('./delete-id'));
+
 module.exports = router;
 
