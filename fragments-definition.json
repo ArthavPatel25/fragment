@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:us-east-1:992382768156:task-definition/fragments-task-1:6",
+  "taskDefinitionArn": "arn:aws:ecs:us-east-1:992382768156:task-definition/fragments-task-1:10",
   "containerDefinitions": [
     {
       "name": "fragments-container-1",
@@ -22,16 +22,12 @@
           "value": "us-east-1_KLZAwhdWg"
         },
         {
-          "name": "AWS_DYNAMODB_ENDPOINT_URL",
-          "value": "https://dynamodb.us-east-1.amazonaws.com"
-        },
-        {
           "name": "AWS_REGION",
           "value": "us-east-1"
         },
         {
-          "name": "PORT",
-          "value": "80"
+          "name": "AWS_DYNAMODB_ENDPOINT_URL",
+          "value": "https://dynamodb.us-east-1.amazonaws.com"
         },
         {
           "name": "AWS_DYNAMODB_TABLE_NAME",
@@ -69,7 +65,7 @@
   "taskRoleArn": "arn:aws:iam::992382768156:role/LabRole",
   "executionRoleArn": "arn:aws:iam::992382768156:role/LabRole",
   "networkMode": "awsvpc",
-  "revision": 6,
+  "revision": 10,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -112,7 +108,7 @@
     "cpuArchitecture": "X86_64",
     "operatingSystemFamily": "LINUX"
   },
-  "registeredAt": "2025-08-04T02:07:28.438Z",
+  "registeredAt": "2025-08-11T21:29:55.769Z",
   "registeredBy": "arn:aws:sts::992382768156:assumed-role/voclabs/user4086701=acpatel23@myseneca.ca",
   "tags": []
 }
